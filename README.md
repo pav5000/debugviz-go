@@ -1,2 +1,3 @@
 # debugviz-go
-Debug visualizer for golang based on nodes
+
+Debug visualizer for golang based on nodes.
