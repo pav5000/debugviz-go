@@ -102,7 +102,11 @@ func NewCollapse(ctx context.Context, name, descr string) (*Node, context.Contex
 		return nil, ctx
 	}
 
-	node.dependsOn = parent.findAllChildlessChildren()
+	childlessNodes := parent.findAllChildlessChildren()
+	for _, childlessNode := range childlessNodes {
+		childlessNode.addChild(node)
+		node.dependsOn = append(node.dependsOn, childlessNode.id)
+	}
 
 	return node, ctx
 }
@@ -116,20 +120,20 @@ func (n *Node) addChild(node *Node) {
 	n.lock.Unlock()
 }
 
-func (n *Node) findAllChildlessChildren() []NodeID {
+func (n *Node) findAllChildlessChildren() []*Node {
 	if n == nil {
 		return nil
 	}
 	children := n.getChildren()
 	if len(children) == 0 {
-		return []NodeID{n.id}
+		return []*Node{n}
 	}
 
-	var ids []NodeID
+	var nodes []*Node
 	for _, child := range children {
-		ids = append(ids, child.findAllChildlessChildren()...)
+		nodes = append(nodes, child.findAllChildlessChildren()...)
 	}
-	return ids
+	return nodes
 }
 
 func (n *Node) getChildren() []*Node {
