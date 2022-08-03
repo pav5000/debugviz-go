@@ -10,7 +10,7 @@ const version = "0.0.1"
 type DebugJSON struct {
 	ThisIsDebugger  bool
 	DebuggerVersion string
-	Nodes           map[NodeID]NodeJSON
+	Nodes           map[string]NodeJSON
 }
 
 type NodeJSON struct {
@@ -25,7 +25,7 @@ type NodeJSON struct {
 
 type DataBlockJSON struct {
 	Type string
-	Data interface{}
+	Data json.RawMessage
 }
 
 type Dummy struct{}
@@ -37,9 +37,14 @@ func (n *Node) Data() NodeJSON {
 	dataBlocksJSON := make([]DataBlockJSON, 0, len(n.dataBlocks))
 
 	for _, block := range n.dataBlocks {
+		rawJSON, err := json.Marshal(block.Data())
+		if err != nil {
+			panic(err)
+		}
+
 		dataBlocksJSON = append(dataBlocksJSON, DataBlockJSON{
 			Type: block.Type(),
-			Data: block.Data(),
+			Data: rawJSON,
 		})
 	}
 
@@ -69,7 +74,7 @@ func (d *DebugViz) JSON() []byte {
 	out := DebugJSON{
 		ThisIsDebugger:  true,
 		DebuggerVersion: version,
-		Nodes:           make(map[NodeID]NodeJSON, len(d.nodes)),
+		Nodes:           make(map[string]NodeJSON, len(d.nodes)),
 	}
 
 	for _, node := range d.nodes {
@@ -78,7 +83,7 @@ func (d *DebugViz) JSON() []byte {
 		}
 		data := node.Data()
 		if data.ID != "" {
-			out.Nodes[node.id] = data
+			out.Nodes[node.id.String()] = data
 		}
 	}
 

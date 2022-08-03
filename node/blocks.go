@@ -1,8 +1,8 @@
 package node
 
 import (
-	"gitlab.ozon.ru/bx-libs/debugviz-go/datablocks/request"
-	"gitlab.ozon.ru/bx-libs/debugviz-go/datablocks/table"
+	"github.com/pav5000/debugviz-go/datablocks/request"
+	"github.com/pav5000/debugviz-go/datablocks/table"
 )
 
 func (n *Node) addDataBlock(block DataBlock) {
