@@ -3,7 +3,6 @@ package node
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -98,7 +97,6 @@ func New(ctx context.Context, name, descr string) (*Node, context.Context) {
 //                │ node5 │ <- нода, созданная функцией NewCollapse(...)
 //                └───────┘
 func NewCollapse(ctx context.Context, name, descr string) (*Node, context.Context) {
-	fmt.Println("### NewCollapse:", name)
 	node, parent, ctx := new(ctx, name, descr)
 	if node == nil || parent == nil {
 		return nil, ctx
