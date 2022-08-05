@@ -13,13 +13,10 @@ import (
 
 var treeLineRe = regexp.MustCompile(`^(\S+)\s*->\s*(\S+)`)
 
-type Link struct {
-	src string
-	dst string
-}
+type Links []string
 
-func (l Link) String() string {
-	return l.src + " -> " + l.dst
+func appendLink(links Links, from, to string) Links {
+	return append(links, from+" -> "+to)
 }
 
 func assertTreesEqual(t *testing.T, expected string, actual context.Context) {
@@ -29,7 +26,7 @@ func assertTreesEqual(t *testing.T, expected string, actual context.Context) {
 	require.NoError(t, err)
 
 	lines := strings.Split(expected, "\n")
-	expectedLinks := make([]Link, 0, len(lines))
+	expectedLinks := make(Links, 0, len(lines))
 	expectedNamesMap := make(map[string]struct{}, len(lines))
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -44,27 +41,22 @@ func assertTreesEqual(t *testing.T, expected string, actual context.Context) {
 		dstNode := matches[2]
 		expectedNamesMap[srcNode] = struct{}{}
 		expectedNamesMap[dstNode] = struct{}{}
-		expectedLinks = append(expectedLinks, Link{
-			src: srcNode,
-			dst: dstNode,
-		})
+
+		expectedLinks = appendLink(expectedLinks, srcNode, dstNode)
 	}
 	expectedNames := make([]string, 0, len(expectedNamesMap))
 	for name := range expectedNamesMap {
 		expectedNames = append(expectedNames, name)
 	}
 
-	actualLinks := make([]Link, 0, len(expectedLinks))
+	actualLinks := make(Links, 0, len(expectedLinks))
 	actualNames := make([]string, 0, len(debugJSON.Nodes))
 	for _, node := range debugJSON.Nodes {
 		actualNames = append(actualNames, node.Name)
 		dstNode := node.Name
 		for _, parent := range node.DependsOn {
 			srcNode := debugJSON.Nodes[parent].Name
-			actualLinks = append(actualLinks, Link{
-				src: srcNode,
-				dst: dstNode,
-			})
+			actualLinks = appendLink(actualLinks, srcNode, dstNode)
 		}
 	}
 
